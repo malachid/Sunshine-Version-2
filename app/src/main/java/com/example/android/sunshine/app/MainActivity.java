@@ -15,22 +15,13 @@
  */
 package com.example.android.sunshine.app;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.net.ConnectivityManagerCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import com.example.android.sunshine.app.events.ConnectionStateEvent;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
-import com.squareup.otto.Subscribe;
 
 public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
 
@@ -43,14 +34,6 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-	    final ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-	    final NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-	    Log.d(Sunshine.TAG, "Direct manager? " + networkInfo.isConnected());
-
-	    Sunshine.getBus().register(this);
-
-        // @TODO double check whether this needs altered if there is no connectivity
         mLocation = Utility.getPreferredLocation(this);
 
         setContentView(R.layout.activity_main);
@@ -79,11 +62,6 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         SunshineSyncAdapter.initializeSyncAdapter(this);
     }
 
-	@Subscribe public void connectionChanged(final ConnectionStateEvent event)
-	{
-		Log.d(Sunshine.TAG, "Connection changed event: " + event.getNetworkInfo().isConnected());
-	}
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -111,13 +89,6 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
     protected void onResume() {
         super.onResume();
 
-	    // @TODO fork/fix ISSUE-137, ISSUE-6
-	    try {
-		    Sunshine.getBus().register(this);
-	    }catch(IllegalArgumentException e){
-		    // no-op
-	    }
-
         String location = Utility.getPreferredLocation( this );
         // update the location in our second pane using the fragment manager
             if (location != null && !location.equals(mLocation)) {
@@ -133,16 +104,6 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         }
     }
 
-	@Override
-	protected void onPause() {
-		// @TODO fork/fix ISSUE-137, ISSUE-6
-		try {
-			Sunshine.getBus().unregister(this);
-		}catch(IllegalArgumentException e){
-			// no-op
-		}
-		super.onPause();
-	}
 
 	@Override
     public void onItemSelected(Uri contentUri) {

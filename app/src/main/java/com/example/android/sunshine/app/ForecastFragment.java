@@ -15,10 +15,12 @@
  */
 package com.example.android.sunshine.app;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -34,7 +36,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.android.sunshine.app.data.WeatherContract;
+import com.example.android.sunshine.app.events.ConnectionStateEvent;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
+import com.squareup.otto.Subscribe;
 
 /**
  * Encapsulates fetching the forecast and displaying it as a {@link ListView} layout.
@@ -126,6 +130,51 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * Called when the fragment is visible to the user and actively running.
+     * This is generally
+     * tied to {@link Activity#onResume() Activity.onResume} of the containing
+     * Activity's lifecycle.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        try {
+            // @TODO Follow-up on https://github.com/square/otto/issues/6
+            Sunshine.getBus().register(this);
+        }catch(IllegalArgumentException e){
+            // no-op
+        }
+    }
+
+    /**
+     * Called when the Fragment is no longer resumed.  This is generally
+     * tied to {@link Activity#onPause() Activity.onPause} of the containing
+     * Activity's lifecycle.
+     */
+    @Override
+    public void onPause() {
+        try {
+            // @TODO Follow-up on https://github.com/square/otto/issues/6
+            Sunshine.getBus().unregister(this);
+        }catch(IllegalArgumentException e){
+            // no-op
+        }
+        super.onPause();
+    }
+
+    @Subscribe
+    public void connectionChanged(final ConnectionStateEvent event)
+    {
+        if(event.getNetworkInfo().isConnected()){
+            Snackbar.make(mListView, R.string.connection_restored, Snackbar.LENGTH_SHORT).show();
+        }else{
+            Snackbar.make(mListView, R.string.connection_lost, Snackbar.LENGTH_LONG).show();
+        }
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

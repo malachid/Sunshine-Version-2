@@ -93,5 +93,7 @@
 
     <!-- Strings related to Notification preference -->
     <string name="pref_last_notification">last_notification</string>
+    <string name="connection_restored">Connection restored.</string>
+    <string name="connection_lost">Connection interrupted. Updates may not be available at this time.</string>
 
 </resources>
