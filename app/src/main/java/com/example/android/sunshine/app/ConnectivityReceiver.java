@@ -12,6 +12,7 @@ import com.example.android.sunshine.app.events.ConnectionStateEvent;
 
 public class ConnectivityReceiver extends BroadcastReceiver {
 	public ConnectivityReceiver() {
+		Log.d(Sunshine.TAG, ConnectivityReceiver.class.getSimpleName() + " called");
 	}
 	
 	@Override

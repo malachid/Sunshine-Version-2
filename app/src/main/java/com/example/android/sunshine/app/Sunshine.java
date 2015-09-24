@@ -34,6 +34,7 @@ extends Application
 	public void reportConnection(final NetworkInfo networkInfo)
 	{
 		lastNetworkInfo = networkInfo;
+		// @TODO error handling
 		Log.d(TAG, "onReceive posting event: " + networkInfo.isConnected());
 		Sunshine.getBus().post(new ConnectionStateEvent(networkInfo));
 	}
